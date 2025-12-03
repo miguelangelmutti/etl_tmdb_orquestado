@@ -90,18 +90,3 @@ class AsyncAPIConsumer:
         # Aquí procesarías 'all_results', que es una lista de JSONs (uno por página)
         with open("all_results.json", "w") as f:
             json.dump(all_results, f)
-
-if __name__ == "__main__":
-    # Configuración
-    MAX_CONCURRENCY = 5    # Máximo de peticiones simultáneas
-    TOTAL_REQUESTS = 20    # Cantidad total de IDs a consultar (ej. 20 películas)
-    MOVIES_CHANGES_URL = "https://api.themoviedb.org/3/movie/changes"
-    API_KEY = "d8f17404b38014c3dd8775004cd38801"
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-    }
-
-    consumer = AsyncAPIConsumer(MAX_CONCURRENCY, TOTAL_REQUESTS, MOVIES_CHANGES_URL, API_KEY, headers)
-    asyncio.run(consumer.run())
