@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import time
 import json
+from utils.logger import setup_logger
 
 class AsyncAPIConsumer:
     def __init__(self, max_concurrency, total_requests, url, api_key, headers):
@@ -11,6 +12,7 @@ class AsyncAPIConsumer:
         self.api_key = api_key
         self.headers = headers
         self.semaphore = asyncio.Semaphore(max_concurrency)
+        self.logger = setup_logger(__name__)
 
     async def fetch_page(self, session, page_number):
         """
@@ -26,7 +28,7 @@ class AsyncAPIConsumer:
             if response.status == 200:
                 return await response.json()
             else:
-                print(f"Error {response.status} en página {page_number}")
+                self.logger.error(f"Error {response.status} en página {page_number}")
                 return None
 
     async def bound_fetch_page(self, session, page_number):
@@ -43,13 +45,13 @@ class AsyncAPIConsumer:
         # 1. Fase de EXPLORACIÓN: Obtener página 1 para saber el total
         # -----------------------------------------------------------
         async with aiohttp.ClientSession() as session:
-            print("--- Consultando página 1 para obtener total de páginas ---")
+            self.logger.info("--- Consultando página 1 para obtener total de páginas ---")
             
             # Esta llamada la hacemos "sola" (sin gather) porque dependemos de ella
             first_page_data = await self.fetch_page(session, 1)
             
             if not first_page_data:
-                print("Falló la obtención de la primera página. Abortando.")
+                self.logger.error("Falló la obtención de la primera página. Abortando.")
                 return
 
             # Imaginemos que la API devuelve 'total_pages'. 
@@ -59,7 +61,7 @@ class AsyncAPIConsumer:
             # Por seguridad para el ejemplo, limitemos a TOTAL_REQUESTS páginas si la API devuelve muchas
             pages_to_fetch = min(total_pages, self.total_requests) 
             
-            print(f"Total encontrado en API: {total_pages}. Vamos a descargar hasta la {pages_to_fetch}.")
+            self.logger.info(f"Total encontrado en API: {total_pages}. Vamos a descargar hasta la {pages_to_fetch}.")
 
             # Inicializamos la lista de resultados con los datos de la página 1
             all_results = [first_page_data]
@@ -74,7 +76,7 @@ class AsyncAPIConsumer:
                     task = self.bound_fetch_page(session, page_num)
                     tasks.append(task)
                 
-                print(f"--- Lanzando {len(tasks)} tareas en paralelo ---")
+                self.logger.info(f"--- Lanzando {len(tasks)} tareas en paralelo ---")
                 
                 # Esperamos a que todas terminen
                 other_pages_data = await asyncio.gather(*tasks)
@@ -84,8 +86,8 @@ class AsyncAPIConsumer:
                 all_results.extend([p for p in other_pages_data if p is not None])
 
         end_time = time.time()
-        print(f"--- Proceso terminado en {end_time - start_time:.2f} segundos ---")
-        print(f"Páginas procesadas correctamente: {len(all_results)}")
+        self.logger.info(f"--- Proceso terminado en {end_time - start_time:.2f} segundos ---")
+        self.logger.info(f"Páginas procesadas correctamente: {len(all_results)}")
         
         # Aquí procesarías 'all_results', que es una lista de JSONs (uno por página)
         with open("all_results.json", "w") as f:
