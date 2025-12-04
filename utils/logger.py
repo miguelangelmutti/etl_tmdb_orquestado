@@ -9,22 +9,22 @@ def setup_logger(
     level: int = logging.INFO,
     format_str: str = '%(asctime)s - %(levelname)s - %(message)s'
 ) -> logging.Logger:
-    """
-    Sets up a logger with the specified configuration.
+    """    
+    Crea un logger que se encarga de registrar los eventos en un archivo y en la consola.
     
     Args:
-        name: Name of the logger.
-        log_file: Path to the log file. If None, only stream handler is used.
-        level: Logging level.
-        format_str: Log format string.
+        name: Nombre del logger.
+        log_file: Ruta al archivo de log. Si None, solo se usa el handler de consola.
+        level: Nivel de logging.
+        format_str: Formato de los logs.
         
     Returns:
-        Configured logger instance.
+        Logger configurado.
     """
     logger = logging.getLogger(name)
     logger.setLevel(level)
     
-    # Avoid adding handlers if they already exist
+    # Evita agregar handlers si ya existen (previene logs duplicados)
     if logger.handlers:
         return logger
         
