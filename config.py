@@ -14,4 +14,5 @@ headers = {
 MAX_CONCURRENCY = 5    # Máximo de peticiones simultáneas
 TOTAL_REQUESTS = 20    # Cantidad total de IDs a consultar (ej. 20 películas)
 MOVIES_CHANGES_URL = "https://api.themoviedb.org/3/movie/changes"
+MOVIE_URL = "https://api.themoviedb.org/3/movie/{}"
 
