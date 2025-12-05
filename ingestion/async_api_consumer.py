@@ -39,6 +39,61 @@ class AsyncAPIConsumer:
             # print(f"Descargando página {page_number}...") 
             return await self.fetch_page(session, page_number)
 
+    async def fetch_item(self, session, item_id, url_template):
+        """
+        Descarga un item específico por ID.
+        """
+        url = url_template.format(item_id)
+        # params = {'api_key': self.api_key, 'language': 'es-ES'} # Opcional: si se requieren params comunes
+        # Para movie details, api_key suele ir en query params también
+        params = {
+            'api_key': self.api_key,
+            'language': 'es-ES'
+        }
+        
+        async with session.get(url, headers=self.headers, params=params) as response:
+            if response.status == 200:
+                return await response.json()
+            else:
+                self.logger.error(f"Error {response.status} en item {item_id}")
+                return None
+
+    async def bound_fetch_item(self, session, item_id, url_template):
+        """
+        Envuelve la petición de item con el semáforo.
+        """
+        async with self.semaphore:
+            return await self.fetch_item(session, item_id, url_template)
+
+    async def fetch_by_ids(self, ids: list, url_template: str):
+        """
+        Descarga en paralelo una lista de items dados sus IDs.
+        """
+        start_time = time.time()
+        self.logger.info(f"--- Iniciando descarga de {len(ids)} items por ID ---")
+        
+        results = []
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            for item_id in ids:
+                task = self.bound_fetch_item(session, item_id, url_template)
+                tasks.append(task)
+            
+            self.logger.info(f"--- Lanzando {len(tasks)} tareas en paralelo ---")
+            responses = await asyncio.gather(*tasks)
+            
+            # Filtrar nulos
+            results = [r for r in responses if r is not None]
+            
+            # Guardar resultados
+            with open("changed_movies_results.json", "w") as f:
+                json.dump(results, f)
+
+        end_time = time.time()
+        self.logger.info(f"--- Proceso de IDs terminado en {end_time - start_time:.2f} segundos ---")
+        self.logger.info(f"Items procesados correctamente: {len(results)}")
+        return results
+
     async def run(self):
         start_time = time.time()
         
@@ -56,13 +111,9 @@ class AsyncAPIConsumer:
 
             # Imaginemos que la API devuelve 'total_pages'. 
             # (TMDb usa exactamente esta clave)
-            total_pages = first_page_data.get('total_pages', 1)
-            
-            # Por seguridad para el ejemplo, limitemos a TOTAL_REQUESTS páginas si la API devuelve muchas
-            pages_to_fetch = min(total_pages, self.total_requests) 
-            
-            self.logger.info(f"Total encontrado en API: {total_pages}. Vamos a descargar hasta la {pages_to_fetch}.")
-
+            pages_to_fetch = first_page_data.get('total_pages', 1)
+            self.logger.info(f"Total de páginas encontradas en API: {pages_to_fetch}. ")        
+                           
             # Inicializamos la lista de resultados con los datos de la página 1
             all_results = [first_page_data]
 
@@ -90,5 +141,5 @@ class AsyncAPIConsumer:
         self.logger.info(f"Páginas procesadas correctamente: {len(all_results)}")
         
         # Aquí procesarías 'all_results', que es una lista de JSONs (uno por página)
-        with open("all_results.json", "w") as f:
+        with open("all_changes_results.json", "w") as f:
             json.dump(all_results, f)

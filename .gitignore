@@ -1,6 +1,9 @@
 #Exclude bakcup folder 
 bup 
 
+# Exclude json files in root folder
+*.json 
+
 # Exclude all contents of exports_landing/ but keep the folder
 exports_landing/*
 !exports_landing/.gitkeep
