@@ -1,3 +1,6 @@
+#Exclude dlt folder
+ingestion/.dlt/
+
 #Exclude bakcup folder 
 bup 
 
@@ -15,7 +18,7 @@ reports/*
 # Exclude all contents of database/ but keep the folder
 !database/.gitkeep
 database/*.db*
-
+*.duckdb
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
