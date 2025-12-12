@@ -1,0 +1,6 @@
+movies_profile:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "G:\\etl-movies\\database\\shared_movies.duckdb"

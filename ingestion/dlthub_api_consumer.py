@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import dlt
-from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DATABASE_FOLDER, DATABASE_NAME, BASE_DIR,LOG_FILE
+from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR,LOG_FILE
 from dlt.sources.rest_api import rest_api_source
 from dlt.sources.helpers.rest_client.paginators import PageNumberPaginator
 from dlt.common.pipeline import get_dlt_pipelines_dir
@@ -52,13 +52,13 @@ class tmdb_api_consumer:
                 
         # Construimos la ruta absoluta a la DB
         #BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        DB_PATH = os.path.join(BASE_DIR, DATABASE_FOLDER, DATABASE_NAME)
-
+        # DB_PATH ya viene absoluta desde config.py
+        
         pipeline = dlt.pipeline(
             pipeline_name="tmdb_movies_changes",
             destination=duckdb(DB_PATH),
-            dataset_name="raw_movies",
-        )
+            dataset_name="raw_movies"
+        )    
 
         pipeline.run(self.tmdb_client)
 

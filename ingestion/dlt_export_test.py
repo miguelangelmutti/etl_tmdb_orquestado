@@ -7,7 +7,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DATABASE_FOLDER, DATABASE_NAME, BASE_DIR, LOG_FILE
+from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR, LOG_FILE, MOVIE_URL
 from utils.logger import setup_logger
 
 setup_logger(LOG_FILE)
@@ -49,7 +49,7 @@ def fetch_movie_details(record, api_key=dlt.secrets["tmdb_access_token"]):
     movie_id = record["id"]
     
     # Construcción de la request
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+    url = f"{MOVIE_URL}/{movie_id}"
     params = {
         "api_key": api_key,
         "language": "es-ES" # Opcional: traer datos en español
@@ -66,9 +66,7 @@ def fetch_movie_details(record, api_key=dlt.secrets["tmdb_access_token"]):
         print(f"Error fetching ID {movie_id}: {response.status_code}")
 
 # 3. EJECUCIÓN DEL PIPELINE CON PARALELISMO
-# Construimos la ruta absoluta a la DB para evitar errores por CWD
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DB_PATH = os.path.join(BASE_DIR, DATABASE_FOLDER, DATABASE_NAME)
+# Utiliza DB_PATH definido en config.py (Fuente única de verdad)
 
 pipeline = dlt.pipeline(
     pipeline_name="tmdb_enrichment_pipeline",
@@ -78,7 +76,7 @@ pipeline = dlt.pipeline(
 
 # Aquí es donde ocurre la MAGIA de la concurrencia.
 # El pipe (|) conecta los recursos.
-# workers=16 lanzará 16 peticiones simultáneas a la API.
+
 logger = setup_logger(
     __name__, 
     log_file=LOG_FILE, 

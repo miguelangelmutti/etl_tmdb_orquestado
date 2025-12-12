@@ -20,8 +20,9 @@ MOVIES_CHANGES_URL = "https://api.themoviedb.org/3/movie/changes"
 MOVIE_URL = "https://api.themoviedb.org/3/movie/"
 DAILY_EXPORT_BASE_URL = f"http://files.tmdb.org/p/exports/"
 TEST_DAILY_EXPORT_BASE_URL = "https://drive.usercontent.google.com/uc?id=1CrorVUM2v_bOukryphiaVp2kw_M69fAL&export=download"
-DATABASE_FOLDER = "database"
-DATABASE_NAME = "shared_movies.duckdb"
+DUCKDB_RELATIVE_PATH = os.getenv("DUCKDB_PATH", "database/shared_movies.duckdb")
+# Generamos la ruta absoluta inmediatamente para que todos los scripts la usen
+DB_PATH = str(BASE_DIR / DUCKDB_RELATIVE_PATH)
 
 
 
