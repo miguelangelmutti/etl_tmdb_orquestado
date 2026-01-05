@@ -23,6 +23,6 @@ TEST_DAILY_EXPORT_BASE_URL = "https://drive.usercontent.google.com/uc?id=1CrorVU
 DUCKDB_RELATIVE_PATH = os.getenv("DUCKDB_PATH", "database/shared_movies.duckdb")
 # Generamos la ruta absoluta inmediatamente para que todos los scripts la usen
 DB_PATH = str(BASE_DIR / DUCKDB_RELATIVE_PATH)
-
+DLT_SCHEMA_PATH = str(BASE_DIR / "ingestion" / "schemas")
 
 
