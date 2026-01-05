@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import dlt
-from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR,LOG_FILE
+from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR,LOG_FILE,DLT_SCHEMA_PATH
 from dlt.sources.rest_api import rest_api_source
 from dlt.sources.helpers.rest_client.paginators import PageNumberPaginator
 from dlt.common.pipeline import get_dlt_pipelines_dir
@@ -35,9 +35,9 @@ class tmdb_api_consumer:
                         },
                     },
                     {
-                        "name": "movie",                        
+                        "name": "movie_changes",                        
                         "endpoint": {
-                            "path": "/{resources.changes.id}",
+                            "path": "/{resources.changes.id}?append_to_response=credits",
                             "response_actions": [
                                 {"status_code": 404, "action": "ignore"},
                                 {"content": "Not found", "action": "ignore"},
@@ -46,7 +46,7 @@ class tmdb_api_consumer:
                     },
                 ],
                 
-        },parallelized=True)
+        },parallelized=True, name="TMDb_API_movies_changes")
     
     def run(self):
                 
@@ -57,7 +57,9 @@ class tmdb_api_consumer:
         pipeline = dlt.pipeline(
             pipeline_name="tmdb_movies_changes",
             destination=duckdb(DB_PATH),
-            dataset_name="raw_movies"
+            dataset_name="raw_movies",
+            import_schema_path=DLT_SCHEMA_PATH+"/import",
+            export_schema_path=DLT_SCHEMA_PATH+"/export"
         )    
 
         pipeline.run(self.tmdb_client)
