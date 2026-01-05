@@ -1,0 +1,211 @@
+version: 4
+version_hash: WW39pmnkhrO2woygEsAzN75zaj/6kMN+1fvKgMX1qJI=
+engine_version: 11
+name: tmdb_get_all_movies
+tables:
+  _dlt_version:
+    columns:
+      version:
+        data_type: bigint
+        nullable: false
+      engine_version:
+        data_type: bigint
+        nullable: false
+      inserted_at:
+        data_type: timestamp
+        nullable: false
+      schema_name:
+        data_type: text
+        nullable: false
+      version_hash:
+        data_type: text
+        nullable: false
+      schema:
+        data_type: text
+        nullable: false
+    write_disposition: skip
+    resource: _dlt_version
+    description: Created by DLT. Tracks schema updates
+  _dlt_loads:
+    columns:
+      load_id:
+        data_type: text
+        nullable: false
+        precision: 64
+      schema_name:
+        data_type: text
+        nullable: true
+      status:
+        data_type: bigint
+        nullable: false
+      inserted_at:
+        data_type: timestamp
+        nullable: false
+      schema_version_hash:
+        data_type: text
+        nullable: true
+    write_disposition: skip
+    resource: _dlt_loads
+    description: Created by DLT. Tracks completed loads
+  tmdb_movies:
+    columns:
+      adult:
+        data_type: bool
+        nullable: true
+      backdrop_path:
+        data_type: text
+        nullable: true
+      belongs_to_collection__id:
+        data_type: bigint
+        nullable: true
+      belongs_to_collection__name:
+        data_type: text
+        nullable: true
+      belongs_to_collection__poster_path:
+        data_type: text
+        nullable: true
+      belongs_to_collection__backdrop_path:
+        data_type: text
+        nullable: true
+      budget:
+        data_type: bigint
+        nullable: true
+      homepage:
+        data_type: text
+        nullable: true
+      id:
+        nullable: false
+        primary_key: true
+        data_type: bigint
+      imdb_id:
+        data_type: text
+        nullable: true
+      original_language:
+        data_type: text
+        nullable: true
+      original_title:
+        data_type: text
+        nullable: true
+      genres:
+        data_type: json
+        nullable: true
+      production_companies:
+        data_type: json
+        nullable: true
+      production_countries:
+        data_type: json
+      spoken_languages:
+        data_type: json
+      origin_country:
+        data_type: json
+      credits:
+        data_type: json
+      overview:
+        data_type: text
+        nullable: true
+      popularity:
+        data_type: double
+        nullable: true
+      poster_path:
+        data_type: text
+        nullable: true
+      release_date:
+        data_type: text
+        nullable: true
+      revenue:
+        data_type: bigint
+        nullable: true
+      runtime:
+        data_type: bigint
+        nullable: true
+      status:
+        data_type: text
+        nullable: true
+      tagline:
+        data_type: text
+        nullable: true
+      title:
+        data_type: text
+        nullable: true
+      video:
+        data_type: bool
+        nullable: true
+      vote_average:
+        data_type: double
+        nullable: true
+      vote_count:
+        data_type: bigint
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    write_disposition: append
+    resource: fetch_movie_details
+    x-normalizer:
+      seen-data: true
+  _dlt_pipeline_state:
+    columns:
+      version:
+        data_type: bigint
+        nullable: false
+      engine_version:
+        data_type: bigint
+        nullable: false
+      pipeline_name:
+        data_type: text
+        nullable: false
+      state:
+        data_type: text
+        nullable: false
+      created_at:
+        data_type: timestamp
+        nullable: false
+      version_hash:
+        data_type: text
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+        precision: 64
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    write_disposition: append
+    file_format: preferred
+    resource: _dlt_pipeline_state
+    x-normalizer:
+      seen-data: true
+settings:
+  detections:
+  - iso_timestamp
+  default_hints:
+    not_null:
+    - _dlt_id
+    - _dlt_root_id
+    - _dlt_parent_id
+    - _dlt_list_idx
+    - _dlt_load_id
+    parent_key:
+    - _dlt_parent_id
+    root_key:
+    - _dlt_root_id
+    unique:
+    - _dlt_id
+    row_key:
+    - _dlt_id
+normalizers:
+  names: snake_case
+  json:
+    module: dlt.common.normalizers.json.relational
+previous_hashes:
+- qRQOdEJb0Q2sEx9w0R8yRGX38jZqkJpXwtFkPG3Vh4I=
+- QlE5+SwNm09Sxy57YQ+7XJt/+fxK6sKo8ct2YMciRu4=
+- VGGAZC6hAFyID3+iFt9e7p+W9tjiDV1rk42Ve233p7c=
+- Zw2gbyBoOCd48dkGWznTPGBBlZeILgu4VAVia+w8A0Y=

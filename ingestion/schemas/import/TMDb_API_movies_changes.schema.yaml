@@ -1,0 +1,154 @@
+version: 1
+version_hash: E8NDK6b+kmHyYla+BZ/YtNMVjWBLYT8HtvM6DRdiI1w=
+engine_version: 11
+name: TMDb_API_movies_changes
+tables:
+  _dlt_version:
+    columns:
+      version:
+        data_type: bigint
+        nullable: false
+      engine_version:
+        data_type: bigint
+        nullable: false
+      inserted_at:
+        data_type: timestamp
+        nullable: false
+      schema_name:
+        data_type: text
+        nullable: false
+      version_hash:
+        data_type: text
+        nullable: false
+      schema:
+        data_type: text
+        nullable: false
+    write_disposition: skip
+    resource: _dlt_version
+    description: Created by DLT. Tracks schema updates
+  _dlt_loads:
+    columns:
+      load_id:
+        data_type: text
+        nullable: false
+        precision: 64
+      schema_name:
+        data_type: text
+        nullable: true
+      status:
+        data_type: bigint
+        nullable: false
+      inserted_at:
+        data_type: timestamp
+        nullable: false
+      schema_version_hash:
+        data_type: text
+        nullable: true
+    write_disposition: skip
+    resource: _dlt_loads
+    description: Created by DLT. Tracks completed loads
+  changes:
+    columns: {}
+    write_disposition: append
+    resource: changes
+  movie_changes:
+    columns: 
+      adult:
+        data_type: bool
+        nullable: true
+      backdrop_path:
+        data_type: text
+        nullable: true
+      budget:
+        data_type: bigint
+        nullable: true
+      homepage:
+        data_type: text
+        nullable: true
+      id:
+        data_type: bigint
+        nullable: true
+      imdb_id:
+        data_type: text
+        nullable: true
+      original_language:
+        data_type: text
+        nullable: true
+      original_title:
+        data_type: text
+        nullable: true
+      genres:
+        data_type: json
+        nullable: true
+      production_companies:
+        data_type: json
+        nullable: true
+      production_countries:
+        data_type: json
+      spoken_languages:
+        data_type: json
+      origin_country:
+        data_type: json
+      credits:
+        data_type: json
+      overview:
+        data_type: text
+        nullable: true
+      popularity:
+        data_type: double
+        nullable: true
+      poster_path:
+        data_type: text
+        nullable: true
+      release_date:
+        data_type: text
+        nullable: true
+      revenue:
+        data_type: bigint
+        nullable: true
+      runtime:
+        data_type: bigint
+        nullable: true
+      status:
+        data_type: text
+        nullable: true
+      tagline:
+        data_type: text
+        nullable: true
+      title:
+        data_type: text
+        nullable: true
+      video:
+        data_type: bool
+        nullable: true
+      vote_average:
+        data_type: double
+        nullable: true
+      vote_count:
+        data_type: bigint
+        nullable: true
+    write_disposition: append
+    resource: movie_changes
+settings:
+  detections:
+  - iso_timestamp
+  default_hints:
+    not_null:
+    - _dlt_id
+    - _dlt_root_id
+    - _dlt_parent_id
+    - _dlt_list_idx
+    - _dlt_load_id
+    parent_key:
+    - _dlt_parent_id
+    root_key:
+    - _dlt_root_id
+    unique:
+    - _dlt_id
+    row_key:
+    - _dlt_id
+normalizers:
+  names: snake_case
+  json:
+    module: dlt.common.normalizers.json.relational
+previous_hashes: []
