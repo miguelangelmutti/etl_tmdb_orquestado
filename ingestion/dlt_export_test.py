@@ -52,8 +52,7 @@ def fetch_movie_details(record, api_key=dlt.secrets["tmdb_access_token"]):
     # MOVIE_URL termina en /, así que concatenamos directamente
     url = f"{MOVIE_URL}{movie_id}?append_to_response=credits"
     params = {
-        "api_key": api_key,
-        "language": "es-ES" # Opcional: traer datos en español
+        "api_key": api_key       
     }
 
     # dlt maneja los reintentos si la API devuelve 429
