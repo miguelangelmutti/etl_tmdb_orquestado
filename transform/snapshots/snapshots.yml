@@ -1,0 +1,11 @@
+version: 2
+
+snapshots:
+    - name: int_last_movie_changes_snapshot
+      relation: ref('int_last_movie_changes')
+      description: "Snapshot of the int_last_movie_changes view"      
+      config:
+        unique_key: ["tmdb_id"]
+        updated_at: load_date
+        strategy: timestamp
+      

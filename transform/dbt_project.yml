@@ -32,5 +32,13 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   etl_movies:
     # Config indicated by + and applies to all files under models/example/
-    example:
+    staging:
       +materialized: view
+    intermediate:
+      +materialized: view
+
+#snapshots:
+#  etl_movies:
+#    +materialized: table
+#    +strategy: timestamp
+#    +invalidate_hard_deletes: true

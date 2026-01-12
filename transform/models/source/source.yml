@@ -1,0 +1,144 @@
+version: 2
+
+sources:
+  - name: shared_movies
+    database: shared_movies
+    schema: raw_movies
+    tables:
+           - name: tmdb_movies
+             description: Tabla de datos de peliculas obtenida del export diario de TMDb y enriquecida con la API de TMDb 
+             columns:
+                  - name: adult
+                    description: indica si la película es para adultos
+                  - name: backdrop_path                  
+                    description: ruta del backdrop de la película
+                  - name: belongs_to_collection__id
+                    description: Identificador de la colección de la película
+                  - name: belongs_to_collection__name
+                    description: nombre de la colección de la película
+                  - name: belongs_to_collection__poster_path
+                    description: ruta del poster de la colección de la película
+                  - name: belongs_to_collection__backdrop_path
+                    description: ruta del backdrop de la colección de la película
+                  - name: budget
+                    description: presupuesto de la película
+                  - name: homepage
+                    description: página web oficial de la película
+                  - name: id
+                    description: Identificador de la película en TMDb
+                  - name: imdb_id
+                    description: Identificador de la película en IMDb
+                  - name: original_language
+                    description: idioma original de la película
+                  - name: original_title
+                    description: título original de la película
+                  - name: genres
+                    description: géneros de la película
+                  - name: production_companies
+                    description: empresas de producción de la película
+                  - name: production_countries
+                    description: países de producción de la película
+                  - name: spoken_languages
+                    description: idiomas hablados en la película
+                  - name: origin_country
+                    description: pais de origen de la película
+                  - name: credits
+                    description: créditos de la película, actores y directores
+                  - name: overview
+                    description: resumen de la película
+                  - name: popularity
+                    description: popularidad de la película
+                  - name: poster_path
+                    description: ruta del poster de la película
+                  - name: release_date
+                    description: fecha de lanzamiento de la película
+                  - name: revenue
+                    description: ingresos de la película
+                  - name: runtime
+                    description: duración de la película
+                  - name: status
+                    description: estado de la película
+                  - name: tagline
+                    description: lema de la película
+                  - name: title
+                    description: título de la película
+                  - name: video
+                    description: indica si la película tiene video
+                  - name: vote_average
+                    description: promedio de votos de la película
+                  - name: vote_count
+                    description: cantidad de votos de la película
+                  - name: _dlt_load_id
+                    description: Identificador de la carga de la película en la ingesta de la API 
+                  - name: _dlt_id
+                    description: Identificador autogenerado por dlthub para la película en la ingesta de la API 
+            
+           - name: movie_changes 
+             description: Tabla de datos de películas obtenida de la API de TMDb
+             columns:
+                  - name: adult
+                    description: indica si la película es para adultos
+                  - name: backdrop_path
+                    description: ruta del backdrop de la película
+                  - name: budget
+                    description: presupuesto de la película
+                  - name: homepage
+                    description: página web de la película
+                  - name: id
+                    description: Identificador de la película en TMDb
+                  - name: imdb_id
+                    description: Identificador de la película en IMDb
+                  - name: original_language
+                    description: idioma original de la película
+                  - name: original_title
+                    description: título original de la película
+                  - name: genres
+                    description: géneros de la película
+                  - name: production_companies
+                    description: empresas de producción de la película
+                  - name: production_countries
+                    description: países de producción de la película
+                  - name: spoken_languages
+                    description: idiomas hablados en la película
+                  - name: origin_country
+                    description: pais de origen de la película
+                  - name: credits
+                    description: créditos de la película, actores y directores
+                  - name: overview
+                    description: resumen de la película
+                  - name: popularity
+                    description: popularidad de la película
+                  - name: poster_path
+                    description: ruta del poster de la película
+                  - name: release_date
+                    description: fecha de lanzamiento de la película
+                  - name: revenue
+                    description: ingresos de la película
+                  - name: runtime
+                    description: duración de la película
+                  - name: status
+                    description: estado de la película
+                  - name: tagline
+                    description: lema de la película
+                  - name: title
+                    description: título de la película
+                  - name: video
+                    description: indica si la película tiene video
+                  - name: vote_average
+                    description: calificación promedio de la película
+                  - name: vote_count
+                    description: número de votos de la película
+                  - name: _dlt_load_id
+                    description: Identificador de la carga de la película en la ingesta de la API 
+                  - name: _dlt_id
+                    description: Identificador autogenerado por dlthub para la película en la ingesta de la API 
+                  - name: belongs_to_collection__id
+                    description: Identificador de la colección a la que pertenece la película
+                  - name: belongs_to_collection__name
+                    description: nombre de la colección a la que pertenece la película
+                  - name: belongs_to_collection__poster_path
+                    description: ruta del poster de la colección a la que pertenece la película
+                  - name: belongs_to_collection__backdrop_path
+                    description: ruta del backdrop de la colección a la que pertenece la película
+                    
+                                    
