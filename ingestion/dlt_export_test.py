@@ -8,24 +8,29 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR, LOG_FILE, MOVIE_URL,DLT_SCHEMA_PATH
+from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR, LOG_FILE, MOVIE_URL,DLT_SCHEMA_PATH, DAILY_EXPORT_BASE_URL, PERSON_URL
 from utils.logger import setup_logger
 
 # 1. EL RECURSO PADRE (El archivo comprimido)
 # Este recurso no escribe en la BD (selected=False) porque solo sirve de "alimentador"
 # para el siguiente paso.
 @dlt.resource(selected=False) 
-def tmdb_daily_ids_stream(entity_type="movie"):
+def tmdb_daily_ids_stream(entity="movie"):
     date_str = datetime.now().strftime("%m_%d_%Y")
-    url = TEST_DAILY_EXPORT_BASE_URL
     
-    print(f"--- Iniciando Stream desde: {url} ---")
-    response = dlt_requests.get(url, stream=True)
+    daily_export_url = DAILY_EXPORT_BASE_URL.format(entity, date_str)
+
+    print(f"--- Iniciando Stream desde: {daily_export_url} ---")
+    response = dlt_requests.get(daily_export_url, stream=True)
+    response.raise_for_status()
     
     with gzip.open(response.raw, mode='rb') as f:
         for line in f:
             if line:
-                yield dlt.common.json.loads(line.decode("utf-8"))                
+                record = dlt.common.json.loads(line.decode("utf-8"))
+                # Inyectamos el tipo de entidad en el registro para que el transformador lo sepa
+                record["_entity_type"] = entity
+                yield record
 
 # 2. EL TRANSFORMADOR (La API en Paralelo)
 # data_from=tmdb_daily_ids_stream vincula este paso con el anterior
@@ -35,22 +40,20 @@ def tmdb_daily_ids_stream(entity_type="movie"):
     primary_key="id",
     table_name="tmdb_movies"
 )
-def fetch_movie_details(record, api_key=dlt.secrets["tmdb_access_token"]):
-    # ESTRATEGIA DE FILTRADO (CRÍTICO)
-    # El archivo diario tiene +800k películas. Consultar la API para todas tomaría días.
-    # Filtramos para procesar solo las que tienen cierta popularidad.
-    #popularity = record.get("popularity", 0)
+def fetch_tmdb_details(record, api_key=dlt.secrets["tmdb_access_token"]):
+    # Recuperamos el entity inyectado por el recurso padre
+    entity_type = record.get("_entity_type", "movie")
     
-    # Ejemplo: Solo enriquecer si la popularidad es mayor a 50
-    #if popularity < 50:
-        #return  # Saltamos este registro (no se guarda nada)
-
-    movie_id = record["id"]
+    entity_id = record["id"]
     
     # Construcción de la request
-    # Construcción de la request
-    # MOVIE_URL termina en /, así que concatenamos directamente
-    url = f"{MOVIE_URL}{movie_id}?append_to_response=credits"
+    if entity_type == "movie":
+        url = f"{MOVIE_URL}{entity_id}?append_to_response=credits"
+    elif entity_type == "person":
+        url = f"{PERSON_URL}{entity_id}"
+    else:
+        raise ValueError(f"Entity type {entity_type} not supported")
+    
     params = {
         "api_key": api_key       
     }
@@ -61,14 +64,19 @@ def fetch_movie_details(record, api_key=dlt.secrets["tmdb_access_token"]):
         response.raise_for_status() # Aseguramos que se lance excepción si no es 200 OK
         
         # Devolvemos el JSON completo de la película enriquecida
-        yield response.json()     
+        data = response.json()
+        # Opcional: Limpiamos el campo auxiliar si no queremos que vaya a la BD final
+        # (Aunque dlt suele manejar bien campos extra, a veces es mejor quitarlos si son solo metadatos de pipeline)
+        # record.pop("_entity_type", None) 
+        
+        yield data
 
     except HTTPError as e:
         if e.response.status_code == 404:
-            print(f"Movie ID {movie_id} not found (404). Skipping.")
+            print(f"Entity ID {entity_id} not found ({url}). Skipping.")
             return # Saltamos este registro silenciosamente
         else:
-            print(f"Error fetching ID {movie_id}: {e}")
+            print(f"Error fetching ID {entity_id}: {e}")
             raise e # Relanzamos otros errores para que dlt los maneje (ej. 500)
 
 # 3. EJECUCIÓN DEL PIPELINE CON PARALELISMO
@@ -91,5 +99,9 @@ logger = setup_logger(
             capture_external_loggers=["dlt"]  # Captura logs de dlt
             )
 logger.info("Iniciando pipeline de primer ingesta")
-pipeline.run(tmdb_daily_ids_stream | fetch_movie_details)
+
+# Ejemplo de uso pasando entity explícito. 
+#pipeline.run(tmdb_daily_ids_stream(entity="movie") | fetch_tmdb_details)
+pipeline.run(tmdb_daily_ids_stream(entity="person") | fetch_tmdb_details)
+
 logger.info("Pipeline de primer ingesta completado")
