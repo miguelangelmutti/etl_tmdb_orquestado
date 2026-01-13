@@ -148,6 +148,62 @@ tables:
     resource: fetch_movie_details
     x-normalizer:
       seen-data: true
+  tmdb_persons:
+    columns:
+      adult:
+        data_type: bool
+        nullable: true
+      biography:
+        data_type: text
+        nullable: true
+      birthday:
+        data_type: text
+        nullable: true
+      gender:
+        data_type: bigint
+        nullable: true
+      id:
+        nullable: false
+        primary_key: true
+        data_type: bigint
+      imdb_id:
+        data_type: text
+        nullable: true
+      known_for_department:
+        data_type: text
+        nullable: true
+      name:
+        data_type: text
+        nullable: true
+      also_known_as:
+        data_type: json
+        nullable: true
+      place_of_birth:
+        data_type: text
+        nullable: true
+      popularity:
+        data_type: double
+        nullable: true
+      profile_path:
+        data_type: text
+        nullable: true
+      _entity_type:
+        data_type: text
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+      deathday:
+        nullable: true
+        data_type: text
+      homepage:
+        nullable: true
+        data_type: text
   _dlt_pipeline_state:
     columns:
       version:
@@ -189,11 +245,6 @@ settings:
 normalizers:
   names: snake_case
   json:
-    module: dlt.common.normalizers.json.relational
-    config:
-      propagation:
-        tables:
-          tmdb_movies:
-            _dlt_id: _dlt_root_id
+    module: dlt.common.normalizers.json.relational    
 previous_hashes:
 - Zw2gbyBoOCd48dkGWznTPGBBlZeILgu4VAVia+w8A0Y=
