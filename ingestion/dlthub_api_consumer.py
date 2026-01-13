@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import dlt
-from config import MOVIE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR,LOG_FILE,DLT_SCHEMA_PATH
+from config import TMDB_BASE_URL, DAILY_EXPORT_BASE_URL, TEST_DAILY_EXPORT_BASE_URL, DB_PATH, BASE_DIR,LOG_FILE,DLT_SCHEMA_PATH
 from dlt.sources.rest_api import rest_api_source
 from dlt.sources.helpers.rest_client.paginators import PageNumberPaginator
 from dlt.common.pipeline import get_dlt_pipelines_dir
@@ -13,10 +13,10 @@ from dlt.destinations import duckdb
 from utils.logger import setup_logger
 
 class tmdb_api_consumer:
-    def __init__(self, MOVIE_URL, fecha_inicio, fecha_fin):
+    def __init__(self, url, fecha_inicio, fecha_fin):
             self.tmdb_client = rest_api_source({
             "client": {
-                    "base_url": MOVIE_URL,
+                    "base_url": url,
                     "auth": {
                         "type": "bearer",
                         "token": dlt.secrets["tmdb_access_token"]
@@ -25,9 +25,9 @@ class tmdb_api_consumer:
             },    
                 "resources": [  
                     {
-                        "name": "changes",
+                        "name": "ids_movies_changes",
                         "endpoint": {
-                            "path": "changes",
+                            "path": "movie/changes",
                             "params": {
                                 "start_date": fecha_inicio,
                                 "end_date": fecha_fin
@@ -37,13 +37,33 @@ class tmdb_api_consumer:
                     {
                         "name": "movie_changes",                        
                         "endpoint": {
-                            "path": "/{resources.changes.id}?append_to_response=credits",
+                            "path": "movie/{resources.ids_movies_changes.id}?append_to_response=credits",
                             "response_actions": [
                                 {"status_code": 404, "action": "ignore"},
                                 {"content": "Not found", "action": "ignore"},
                             ]
                         },                
                     },
+                    {
+                        "name": "ids_persons_changes",
+                        "endpoint": {
+                            "path": "person/changes",
+                            "params": {
+                                "start_date": fecha_inicio,
+                                "end_date": fecha_fin
+                            },
+                        },
+                    },
+                    {
+                        "name": "person_changes",                        
+                        "endpoint": {
+                            "path": "person/{resources.ids_persons_changes.id}",
+                            "response_actions": [
+                                {"status_code": 404, "action": "ignore"},
+                                {"content": "Not found", "action": "ignore"},
+                            ]
+                        },                
+                    },                    
                 ],
                 
         },parallelized=True, name="TMDb_API_movies_changes")
@@ -71,5 +91,5 @@ if __name__ == "__main__":
     capture_external_loggers=["dlt"]  # Captura logs de dlt
     )
 
-    tmdb_api_consumer = tmdb_api_consumer(MOVIE_URL, "2025-12-03", "2025-12-03")
+    tmdb_api_consumer = tmdb_api_consumer(TMDB_BASE_URL, "2026-01-11", "2026-01-11")
     tmdb_api_consumer.run()
