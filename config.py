@@ -18,7 +18,8 @@ MAX_CONCURRENCY = 5    # Máximo de peticiones simultáneas
 TOTAL_REQUESTS = 20    # Cantidad total de IDs a consultar (ej. 20 películas)
 MOVIES_CHANGES_URL = "https://api.themoviedb.org/3/movie/changes"
 MOVIE_URL = "https://api.themoviedb.org/3/movie/"
-DAILY_EXPORT_BASE_URL = f"http://files.tmdb.org/p/exports/"
+PERSON_URL = "https://api.themoviedb.org/3/person/"
+DAILY_EXPORT_BASE_URL = "http://files.tmdb.org/p/exports/{}_ids_{}.json.gz"
 TEST_DAILY_EXPORT_BASE_URL = "https://drive.usercontent.google.com/uc?id=1CrorVUM2v_bOukryphiaVp2kw_M69fAL&export=download"
 DUCKDB_RELATIVE_PATH = os.getenv("DUCKDB_PATH", "database/shared_movies.duckdb")
 # Generamos la ruta absoluta inmediatamente para que todos los scripts la usen
@@ -26,3 +27,4 @@ DB_PATH = str(BASE_DIR / DUCKDB_RELATIVE_PATH)
 DLT_SCHEMA_PATH = str(BASE_DIR / "ingestion" / "schemas")
 
 
+#http://files.tmdb.org/p/exports/adult_movie_ids_05_15_2024.json.gz
