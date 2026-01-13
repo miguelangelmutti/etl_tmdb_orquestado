@@ -1,3 +1,7 @@
+#Exclude daily exports
+daily_exports/*
+!daily_exports/.gitkeep
+
 #Exclude dlt folder
 ingestion/.dlt/
 
