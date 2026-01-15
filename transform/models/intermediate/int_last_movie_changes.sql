@@ -3,9 +3,9 @@
 with tmdb_movies_and_changes as (
 select 
     stg_changes.tmdb_id,
-    stg_changes.imdb_id,
-    stg_changes.status,
+    stg_changes.imdb_id,    
     stg_changes.original_title,
+    stg_changes.status,
     stg_changes.release_date,
     stg_changes.budget,
     stg_changes.revenue,
@@ -34,13 +34,13 @@ select
     stg_changes.load_id,
     stg_changes.load_date,
     stg_changes.dlt_id 
-from {{ref('stg_changes')}} as stg_changes
+from {{ref('stg_movie_changes')}} as stg_changes
 union all
 select 
     stg_movies.tmdb_id,
-    stg_movies.imdb_id,
-    stg_movies.status,
+    stg_movies.imdb_id,    
     stg_movies.original_title,
+    stg_movies.status,
     stg_movies.release_date,
     stg_movies.budget,
     stg_movies.revenue,
