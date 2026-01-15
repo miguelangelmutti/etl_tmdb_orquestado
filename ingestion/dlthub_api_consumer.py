@@ -91,5 +91,5 @@ if __name__ == "__main__":
     capture_external_loggers=["dlt"]  # Captura logs de dlt
     )
 
-    tmdb_api_consumer = tmdb_api_consumer(TMDB_BASE_URL, "2026-01-11", "2026-01-11")
+    tmdb_api_consumer = tmdb_api_consumer(TMDB_BASE_URL, "2026-01-12", "2026-01-14")
     tmdb_api_consumer.run()
