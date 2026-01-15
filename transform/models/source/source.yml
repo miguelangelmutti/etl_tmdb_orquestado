@@ -140,5 +140,76 @@ sources:
                     description: ruta del poster de la colección a la que pertenece la película
                   - name: belongs_to_collection__backdrop_path
                     description: ruta del backdrop de la colección a la que pertenece la película
-                    
-                                    
+
+           - name: tmdb_persons
+             description: Tabla de datos de personas obtenida de la API de TMDb
+             columns:
+                  - name: adult
+                    description: indica si la persona es para adultos
+                  - name: biography
+                    description: biografía de la persona
+                  - name: birthday
+                    description: fecha de nacimiento de la persona
+                  - name: gender
+                    description: género de la persona
+                  - name: id
+                    description: Identificador de la persona en TMDb
+                  - name: imdb_id
+                    description: Identificador de la persona en IMDb
+                  - name: known_for_department
+                    description: departamento de la persona
+                  - name: name
+                    description: nombre de la persona
+                  - name: also_known_as
+                    description: nombres alternativos de la persona
+                  - name: place_of_birth
+                    description: lugar de nacimiento de la persona
+                  - name: popularity
+                    description: popularidad de la persona
+                  - name: profile_path
+                    description: ruta del perfil de la persona
+                  - name: _entity_type
+                    description: tipo de entidad al momento de la ingesta 
+                  - name: _dlt_load_id
+                    description: Identificador de la carga de la persona en la ingesta de la API 
+                  - name: _dlt_id
+                    description: Identificador autogenerado por dlthub para la persona en la ingesta de la API 
+                  - name: deathday
+                    description: fecha de muerte de la persona
+                  - name: homepage
+                    description: página web de la persona
+           
+           - name: person_changes
+             description: Tabla de datos de cambios de personas obtenida de la API de cambios de TMDb
+             columns:
+                  - name: adult
+                    description: indica si la persona es para adultos
+                  - name: biography
+                    description: biografía de la persona
+                  - name: gender
+                    description: género de la persona
+                  - name: id
+                    description: Identificador de la persona en TMDb
+                  - name: imdb_id
+                    description: Identificador de la persona en IMDb
+                  - name: known_for_department
+                    description: departamento de la persona
+                  - name: name
+                    description: nombre de la persona
+                  - name: also_known_as
+                    description: nombres alternativos de la persona
+                  - name: place_of_birth
+                    description: lugar de nacimiento de la persona
+                  - name: popularity
+                    description: popularidad de la persona
+                  - name: profile_path
+                    description: ruta del perfil de la persona
+                  - name: _dlt_load_id
+                    description: Identificador de la carga de la persona en la ingesta de la API 
+                  - name: _dlt_id
+                    description: Identificador autogenerado por dlthub para la persona en la ingesta de la API 
+                  - name: deathday
+                    description: fecha de muerte de la persona
+                  - name: homepage
+                    description: página web de la persona           
+            
