@@ -1,5 +1,5 @@
 version: 6
-version_hash: IQLv6pRPnG3QqvbrWF5GRaKEVZE7fv20w4k860/FgeY=
+version_hash: SkFkU3GWvCiROeUeQSbfRIB4jTJgtq71p/nK0uFfsLw=
 engine_version: 11
 name: tmdb_get_all_movies
 tables:
@@ -235,36 +235,42 @@ tables:
         data_type: text
         nullable: false
         precision: 64
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
     write_disposition: append
     file_format: preferred
     resource: _dlt_pipeline_state
+    x-normalizer:
+      seen-data: true
 settings:
   detections:
   - iso_timestamp
   default_hints:
     not_null:
     - _dlt_id
-    - _dlt_load_id
     - _dlt_root_id
     - _dlt_parent_id
     - _dlt_list_idx
-    unique:
-    - _dlt_id
-    row_key:
-    - _dlt_id
+    - _dlt_load_id
     parent_key:
     - _dlt_parent_id
     root_key:
     - _dlt_root_id
+    unique:
+    - _dlt_id
+    row_key:
+    - _dlt_id
 normalizers:
   names: snake_case
   json:
     module: dlt.common.normalizers.json.relational
 previous_hashes:
-- 020evoKN91Bm2WBc2vIiVpHPo3bp0UX2f8HyNtEBsNU=
-- ElcY8epeI1nR9sLkS4vJ9bX23hb/Ut6Wm3ADs0qXZt4=
-- s0nR3bePQdRjziGMlBgVKHy/8jMO70yPt7qEyrnhhgs=
+- nCPPsoJZHN+jjXtcM5ZRo7KgYGsZGCMTfTiD/FEDJjw=
+- aMjUfDrhBXmOslrGmPf1sy22uVT0xYIOiY4/cGfNh5s=
+- 1GqWkJGdkfMI9QLdGooJCUAfYYOFoWFOgJWjIdTz+m4=
 - yzDYiz7JIqhSm2akyEdI/weVa0uFAOnqu7ona3Jez6g=
-- PQIMVqxVlRcKMvHRzHsMBFdRbufXhvVUQrvRIjDoR18=
 - VGGAZC6hAFyID3+iFt9e7p+W9tjiDV1rk42Ve233p7c=
 - Zw2gbyBoOCd48dkGWznTPGBBlZeILgu4VAVia+w8A0Y=
