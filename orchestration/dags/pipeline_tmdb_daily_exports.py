@@ -1,16 +1,17 @@
 from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
+from docker.types import Mount
 from datetime import datetime
 
 with DAG(
-    'dag_aislado_github',
+    'dag_tmdb_daily_exports',
     start_date=datetime(2024, 1, 1),
     schedule_interval=None,
     catchup=False
 ) as dag:
 
-    ejecutar_tarea_github = DockerOperator(
-        task_id='tarea_desde_repo',
+    ejecutar_tarea_consumir_api = DockerOperator(
+        task_id='tarea_consumir_api',
         image='python:3.11-slim', # O una imagen tuya personalizada
         api_version='auto',
         auto_remove=True,
