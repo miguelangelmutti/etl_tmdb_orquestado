@@ -1,5 +1,7 @@
 import sys
 import os
+import argparse
+from datetime import date, timedelta
 
 # Agrega el directorio padre al sys.path para poder importar config
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -91,5 +93,18 @@ if __name__ == "__main__":
     capture_external_loggers=["dlt"]  # Captura logs de dlt
     )
 
-    tmdb_api_consumer = tmdb_api_consumer(TMDB_BASE_URL, "2026-01-12", "2026-01-14")
-    tmdb_api_consumer.run()
+    parser = argparse.ArgumentParser(description="Run TMDB API Consumer with optional date range.")
+    parser.add_argument('--fecha_inicio', type=str, help='Start date in YYYY-MM-DD format')
+    parser.add_argument('--fecha_fin', type=str, help='End date in YYYY-MM-DD format')
+    args = parser.parse_args()
+
+    # Default to yesterday if not provided
+    yesterday = (date.today() - timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    fecha_inicio = args.fecha_inicio if args.fecha_inicio else yesterday
+    fecha_fin = args.fecha_fin if args.fecha_fin else yesterday
+
+    logger.info(f"Running extraction for range: {fecha_inicio} to {fecha_fin}")
+
+    consumer = tmdb_api_consumer(TMDB_BASE_URL, fecha_inicio, fecha_fin)
+    consumer.run()
