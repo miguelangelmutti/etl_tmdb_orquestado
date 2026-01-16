@@ -1,5 +1,5 @@
 version: 4
-version_hash: Q19VKqeZ/urJG0Lw+aveUjJsWGgSGDXQjObqSU6Ogu4=
+version_hash: FzkW0Fynabem+2m2hyZT3+37IM6nBMvOGCFrEkJLGUo=
 engine_version: 11
 name: TMDb_API_movies_changes
 tables:
@@ -232,9 +232,6 @@ tables:
       id:
         data_type: bigint
         nullable: true
-      adult:
-        data_type: bool
-        nullable: true
       _dlt_load_id:
         data_type: text
         nullable: false
@@ -243,8 +240,45 @@ tables:
         nullable: false
         unique: true
         row_key: true
+      adult:
+        nullable: true
+        data_type: bool
     write_disposition: append
     resource: ids_persons_changes
+    x-normalizer:
+      seen-data: true
+  _dlt_pipeline_state:
+    columns:
+      version:
+        data_type: bigint
+        nullable: false
+      engine_version:
+        data_type: bigint
+        nullable: false
+      pipeline_name:
+        data_type: text
+        nullable: false
+      state:
+        data_type: text
+        nullable: false
+      created_at:
+        data_type: timestamp
+        nullable: false
+      version_hash:
+        data_type: text
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+        precision: 64
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    write_disposition: append
+    file_format: preferred
+    resource: _dlt_pipeline_state
     x-normalizer:
       seen-data: true
 settings:
@@ -270,7 +304,7 @@ normalizers:
   json:
     module: dlt.common.normalizers.json.relational
 previous_hashes:
+- Ys7BnIdSpNCmDdcD7P67Q561aWs9E7aB0s3wjg+pr4M=
 - P6Aec4jGFu4YXm3wCzN21mikoqerJa5Z9WaR0uq1BlE=
 - u1GVM1b2B1XSBEofDZv5mc4u1wmSeVKzt9gMbED8800=
-- pzfUyRYMF4ohozQtLZCjLiR0c7BboGrIffLL5izlECI=
 - E8NDK6b+kmHyYla+BZ/YtNMVjWBLYT8HtvM6DRdiI1w=

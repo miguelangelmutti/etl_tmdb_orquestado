@@ -64,7 +64,6 @@ services:
       - AIRFLOW__CORE__FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW_UID=${AIRFLOW_UID:-50000}
-      - HOST_PROJECT_PATH=${HOST_PROJECT_PATH:-.}
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs

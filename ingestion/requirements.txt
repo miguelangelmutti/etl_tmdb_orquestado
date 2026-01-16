@@ -1,2 +1,3 @@
 aiohttp==3.13.2
 dlt[duckdb]==1.19.1
+python-dotenv==1.2.1
