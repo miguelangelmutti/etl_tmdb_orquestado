@@ -5,6 +5,9 @@ daily_exports/*
 #Exclude dlt folder
 ingestion/.dlt/
 
+#Exclude orchestration logs
+orchestration/logs/
+
 #Exclude bakcup folder 
 bup 
 
