@@ -38,6 +38,30 @@ with DAG(
         }
     )
 
+    ingestar_cambios_api = DockerOperator(
+        task_id='ingestar_cambios_api',
+        image='python:3.11-slim',
+        api_version='auto',
+        auto_remove=True,
+        # 1. Install dependencies from the mounted requirements file
+        # 2. Run the ingestion script
+        command="/bin/bash -c 'cp ingestion/.dlt/config.toml.example ingestion/.dlt/config.toml && cp ingestion/.dlt/secrets.toml.example ingestion/.dlt/secrets.toml && python -c \"import os; content = open(\\\"ingestion/.dlt/secrets.toml\\\").read().replace(\\\"your_tmdb_api_key_here\\\", os.environ.get(\\\"TOKEN\\\")); open(\\\"ingestion/.dlt/secrets.toml\\\", \\\"w\\\").write(content)\" && pip install -r ingestion/requirements.txt && python ingestion/dlthub_api_consumer.py'",
+        docker_url='unix://var/run/docker.sock',
+        network_mode='etl-network',  # Connect to the same network as other services
+        mounts=[
+            Mount(
+                source=HOST_PROJECT_PATH,  # Absolute path on the HOST machine
+                target="/app",             # Path inside the container
+                type="bind"
+            )
+        ],
+        working_dir="/app",
+        environment={
+            "TOKEN": os.getenv("TOKEN"),     # Pass TMDB Token if needed explicitly
+            "API_KEY": os.getenv("API_KEY")  # Pass API Key if needed explicitly
+        }
+    )    
+
     transformar_daily_exports = DockerOperator(
         task_id='transformar_daily_exports',
         image='python:3.11-slim',
@@ -68,4 +92,4 @@ with DAG(
         }
     )
 
-    ingestar_daily_exports >> transformar_daily_exports
+    ingestar_daily_exports >> ingestar_cambios_api >> transformar_daily_exports

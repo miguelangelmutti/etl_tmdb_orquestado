@@ -1,5 +1,5 @@
 version: 4
-version_hash: FzkW0Fynabem+2m2hyZT3+37IM6nBMvOGCFrEkJLGUo=
+version_hash: XIV8guupWfJNAGuRuN6NgLcTmm7WZLoIA3S8Qk/ZOeU=
 engine_version: 11
 name: TMDb_API_movies_changes
 tables:
@@ -145,8 +145,8 @@ tables:
         data_type: text
         nullable: true
       belongs_to_collection__backdrop_path:
-        nullable: true
         data_type: text
+        nullable: true
     write_disposition: append
     resource: movie_changes
     x-normalizer:
@@ -232,6 +232,9 @@ tables:
       id:
         data_type: bigint
         nullable: true
+      adult:
+        data_type: bool
+        nullable: true
       _dlt_load_id:
         data_type: text
         nullable: false
@@ -240,9 +243,6 @@ tables:
         nullable: false
         unique: true
         row_key: true
-      adult:
-        nullable: true
-        data_type: bool
     write_disposition: append
     resource: ids_persons_changes
     x-normalizer:
