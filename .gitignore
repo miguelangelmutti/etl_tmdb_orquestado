@@ -2,8 +2,10 @@
 daily_exports/*
 !daily_exports/.gitkeep
 
-#Exclude dlt folder
-ingestion/.dlt/
+# 1. Ignorar todo EL CONTENIDO dentro de la carpeta (nota el asterisco *)
+ingestion/.dlt/*
+
+# 2. Las excepciones (archivos que SI quieres trackear)
 !ingestion/.dlt/config.toml.example
 !ingestion/.dlt/secrets.toml.example
 !ingestion/.dlt/.gitkeep
