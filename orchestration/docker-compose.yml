@@ -73,27 +73,43 @@ services:
     command: scheduler
     restart: always
 
+  # --- SECCIÓN MODIFICADA Y ARREGLADA ---
   airflow-init:
     image: apache/airflow:2.10.2
+    # 1. Usamos usuario root (0:0) para tener permiso de hacer 'chown'
+    user: "0:0"
     env_file:
       - ../.env
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW_UID=${AIRFLOW_UID:-50000}
-      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_DB_MIGRATE=true
       - _AIRFLOW_WWW_USER_CREATE=true
       - _AIRFLOW_WWW_USER_USERNAME=airflow
       - _AIRFLOW_WWW_USER_PASSWORD=airflow
     depends_on:
       postgres:
         condition: service_healthy
-    command: version
+    volumes:
+      # 2. Montamos el directorio actual en /sources para corregir permisos
+      - .:/sources
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        echo "Corrigiendo permisos de carpetas..."
+        mkdir -p /sources/logs /sources/dags /sources/plugins
+        # Asignamos el dueño correcto (airflow user) a las carpetas montadas
+        chown -R "${AIRFLOW_UID}:0" /sources/logs /sources/dags /sources/plugins
+        
+        echo "Inicializando Airflow..."
+        exec /entrypoint airflow version
 
 volumes:
   postgres-db-volume:
 
-
+# Tu red original se mantiene
 networks:
   default:
     name: etl-network
