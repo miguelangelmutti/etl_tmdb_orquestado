@@ -4,9 +4,10 @@ daily_exports/*
 
 #Exclude dlt folder
 ingestion/.dlt/
-ingestion/.dlt/config.toml.example
-ingestion/.dlt/secrets.toml.example
-ingestion/.dlt/.gitkeep
+!ingestion/.dlt/config.toml.example
+!ingestion/.dlt/secrets.toml.example
+!ingestion/.dlt/.gitkeep
+
 #Exclude orchestration logs
 orchestration/logs/
 
