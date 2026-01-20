@@ -1,5 +1,5 @@
 version: 4
-version_hash: XIV8guupWfJNAGuRuN6NgLcTmm7WZLoIA3S8Qk/ZOeU=
+version_hash: z5GOLbyRCl7IBanrF8zWDxIDSLM5xUqUBIU3QMhoLjc=
 engine_version: 11
 name: TMDb_API_movies_changes
 tables:
@@ -127,14 +127,6 @@ tables:
       vote_count:
         data_type: bigint
         nullable: true
-      _dlt_load_id:
-        data_type: text
-        nullable: false
-      _dlt_id:
-        data_type: text
-        nullable: false
-        unique: true
-        row_key: true
       belongs_to_collection__id:
         data_type: bigint
         nullable: true
@@ -147,6 +139,14 @@ tables:
       belongs_to_collection__backdrop_path:
         data_type: text
         nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
     write_disposition: append
     resource: movie_changes
     x-normalizer:
@@ -207,26 +207,6 @@ tables:
     resource: person_changes
     x-normalizer:
       seen-data: true
-  ids_movies_changes:
-    columns:
-      id:
-        data_type: bigint
-        nullable: true
-      adult:
-        data_type: bool
-        nullable: true
-      _dlt_load_id:
-        data_type: text
-        nullable: false
-      _dlt_id:
-        data_type: text
-        nullable: false
-        unique: true
-        row_key: true
-    write_disposition: append
-    resource: ids_movies_changes
-    x-normalizer:
-      seen-data: true
   ids_persons_changes:
     columns:
       id:
@@ -245,6 +225,26 @@ tables:
         row_key: true
     write_disposition: append
     resource: ids_persons_changes
+    x-normalizer:
+      seen-data: true
+  ids_movies_changes:
+    columns:
+      id:
+        data_type: bigint
+        nullable: true
+      adult:
+        data_type: bool
+        nullable: true
+      _dlt_load_id:
+        data_type: text
+        nullable: false
+      _dlt_id:
+        data_type: text
+        nullable: false
+        unique: true
+        row_key: true
+    write_disposition: append
+    resource: ids_movies_changes
     x-normalizer:
       seen-data: true
   _dlt_pipeline_state:
