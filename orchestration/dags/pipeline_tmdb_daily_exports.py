@@ -21,7 +21,7 @@ with DAG(
         auto_remove=True,
         # 1. Install dependencies from the mounted requirements file
         # 2. Run the ingestion script
-        command="/bin/bash /app/ingestion/entrypoint.sh ingestion/dlt_export_test.py",
+        command="/bin/bash /app/ingestion/entrypoint.sh ingestion/dlt_export_test.py ",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',  # Connect to the same network as other services
         mounts=[
@@ -45,7 +45,7 @@ with DAG(
         auto_remove=True,
         # 1. Install dependencies from the mounted requirements file
         # 2. Run the ingestion script
-        command="/bin/bash /app/ingestion/entrypoint.sh ingestion/dlthub_api_consumer.py",
+        command="/bin/bash /app/ingestion/entrypoint.sh ingestion/dlthub_api_consumer.py ",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',  # Connect to the same network as other services
         mounts=[
@@ -70,7 +70,7 @@ with DAG(
         # 1. Generate dynamic profiles.yml
         # 2. Install dependencies
         # 3. Run dbt build using the generated profile
-        command="/bin/bash /app/transform/entrypoint.sh",
+        command="/bin/bash /app/transform/entrypoint.sh ",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[
