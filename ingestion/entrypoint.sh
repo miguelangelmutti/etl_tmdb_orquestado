@@ -26,5 +26,5 @@ echo "Installing dependencies..."
 pip install -r ingestion/requirements.txt
 
 # 4. Run the Ingestion Script
-echo "Running script: $SCRIPT_PATH"
-python "$SCRIPT_PATH"
+echo "Running script: $SCRIPT_PATH with args: ${@:2}"
+python "$SCRIPT_PATH" "${@:2}"
