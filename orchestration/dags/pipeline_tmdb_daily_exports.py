@@ -55,7 +55,8 @@ with DAG(
         ],
         environment={
             "TOKEN": os.getenv("TOKEN"),
-            "API_KEY": os.getenv("API_KEY")
+            "API_KEY": os.getenv("API_KEY"),
+            "TMDB_ACCESS_TOKEN": os.getenv("TOKEN") # For dlt native resolution
         }
     )
 
@@ -102,7 +103,8 @@ with DAG(
         working_dir="/app",
         environment={
             "TOKEN": os.getenv("TOKEN"),     # Pass TMDB Token if needed explicitly
-            "API_KEY": os.getenv("API_KEY")  # Pass API Key if needed explicitly
+            "API_KEY": os.getenv("API_KEY"),  # Pass API Key if needed explicitly
+            "TMDB_ACCESS_TOKEN": os.getenv("TOKEN") # For dlt native resolution
         }
     )    
 
