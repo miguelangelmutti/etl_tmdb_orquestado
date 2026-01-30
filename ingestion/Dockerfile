@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY ingestion/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy config.py to the root of the app
+COPY config.py .
+
 # Copy the rest of the application
 COPY ingestion/ ingestion/
 

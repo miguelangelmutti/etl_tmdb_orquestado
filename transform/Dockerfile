@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY transform/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy config.py to the root of the app
+COPY config.py .
+
 # Copy transformation code
 COPY transform/ transform/
 
