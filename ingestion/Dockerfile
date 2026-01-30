@@ -15,6 +15,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy config.py to the root of the app
 COPY config.py .
 
+# Copy utils package
+COPY utils/ utils/
+
+# Create logs directory
+RUN mkdir -p logs
+
 # Copy the rest of the application
 COPY ingestion/ ingestion/
 

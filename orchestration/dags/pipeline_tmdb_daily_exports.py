@@ -46,6 +46,11 @@ with DAG(
                 source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
                 target="/app/ingestion/.dlt",
                 type="bind"
+            ),
+             Mount(
+                source=f"{HOST_PROJECT_PATH}/logs",
+                target="/app/logs",
+                type="bind"
             )
         ],
         environment={
@@ -86,6 +91,11 @@ with DAG(
              Mount(
                 source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
                 target="/app/ingestion/.dlt",
+                type="bind"
+            ),
+             Mount(
+                source=f"{HOST_PROJECT_PATH}/logs",
+                target="/app/logs",
                 type="bind"
             )
         ],
