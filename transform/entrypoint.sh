@@ -13,11 +13,7 @@ echo "movies_profile:
       type: duckdb
       path: /app/database/shared_movies.duckdb" > ~/.dbt/profiles.yml
 
-# 2. Install Dependencies
-echo "Installing dependencies..."
-pip install -r transform/requirements.txt
-
-# 3. Run dbt build
-echo "Running dbt build..."
+# 2. Exec arguments
+echo "Running command: $@"
 cd transform
-dbt build --profiles-dir ~/.dbt
+exec "$@"
