@@ -18,4 +18,7 @@ python -c "import os; content = open('ingestion/.dlt/secrets.toml').read().repla
 
 # 3. Exec arguments
 echo "Running command: $@"
+echo "Current directory: $(pwd)"
+echo "Listing files in /app:"
+ls -la /app
 exec "$@"
