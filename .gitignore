@@ -31,6 +31,7 @@ reports/*
 !database/.gitkeep
 database/*.db*
 *.duckdb
+*.parquet
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
