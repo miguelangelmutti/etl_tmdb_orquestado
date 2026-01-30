@@ -72,7 +72,8 @@ with DAG(
         api_version='auto',
         auto_remove=True,
         # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
-        command="dbt build --profiles-dir ~/.dbt",
+        # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
+        command="dbt build",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[

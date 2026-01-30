@@ -5,13 +5,14 @@ echo "Starting transformation setup..."
 
 # 1. Setup dbt profile
 echo "Generating profiles.yml..."
-mkdir -p ~/.dbt
+mkdir -p /root/.dbt
+export DBT_PROFILES_DIR=/root/.dbt
 echo "movies_profile:
   target: dev
   outputs:
     dev:
       type: duckdb
-      path: /app/database/shared_movies.duckdb" > ~/.dbt/profiles.yml
+      path: /app/database/shared_movies.duckdb" > /root/.dbt/profiles.yml
 
 # 2. Exec arguments
 echo "Running command: $@"
