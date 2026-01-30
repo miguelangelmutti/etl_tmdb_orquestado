@@ -1,0 +1,67 @@
+name: Docker Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+      - feat_cicd
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and Push Ingestion Image
+      - name: Extract metadata (tags, labels) for Ingestion
+        id: meta-ingestion
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/ingesta
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: Build and push Ingestion Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./ingestion/Dockerfile
+          push: true
+          tags: ${{ steps.meta-ingestion.outputs.tags }}
+          labels: ${{ steps.meta-ingestion.outputs.labels }}
+
+      # Build and Push Transformation Image
+      - name: Extract metadata (tags, labels) for Transformation
+        id: meta-transformation
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/transformacion
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: Build and push Transformation Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./transform/Dockerfile
+          push: true
+          tags: ${{ steps.meta-transformation.outputs.tags }}
+          labels: ${{ steps.meta-transformation.outputs.labels }}

@@ -20,38 +20,49 @@ with DAG(
 
     ingestar_daily_exports = DockerOperator(
         task_id='ingestar_daily_exports',
-        image='python:3.11-slim',
+        # Reemplaza [usuario]/[repo] con tu usuario y nombre de repositorio
+        image='ghcr.io/[usuario]/[repo]/ingesta:latest',
         api_version='auto',
         auto_remove=True,
-        # 1. Install dependencies from the mounted requirements file
-        # 2. Run the ingestion script
-        command="/bin/bash /app/ingestion/entrypoint.sh ingestion/dlt_export_test.py ",
+        # El comando ahora es simplemente la ejecución del script, 
+        # las dependencias ya están en la imagen.
+        command="python ingestion/dlt_export_test.py",
         docker_url='unix://var/run/docker.sock',
-        network_mode='etl-network',  # Connect to the same network as other services
+        network_mode='etl-network',
         mounts=[
+            # IMPORTANTE: Ya no montamos todo el código (/app <- HOST_PROJECT_PATH).
+            # Solo montamos los directorios donde persisten datos (DB, exports, logs).
             Mount(
-                source=HOST_PROJECT_PATH,  # Absolute path on the HOST machine
-                target="/app",             # Path inside the container
+                source=f"{HOST_PROJECT_PATH}/database",
+                target="/app/database",
+                type="bind"
+            ),
+            Mount(
+                source=f"{HOST_PROJECT_PATH}/daily_exports",
+                target="/app/daily_exports",
+                type="bind"
+            ),
+             Mount(
+                source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
+                target="/app/ingestion/.dlt",
                 type="bind"
             )
         ],
-        working_dir="/app",
         environment={
-            "TOKEN": os.getenv("TOKEN"),     # Pass TMDB Token if needed explicitly
-            "API_KEY": os.getenv("API_KEY")  # Pass API Key if needed explicitly
+            "TOKEN": os.getenv("TOKEN"),
+            "API_KEY": os.getenv("API_KEY")
         }
     )
 
-    ingestion_changes_command = (
-        "/bin/bash /app/ingestion/entrypoint.sh "
-        "ingestion/dlthub_api_consumer.py "
+    ingestion_changes_command = (        
+        "python ingestion/dlthub_api_consumer.py "
         "{% if params.fecha_inicio %}--fecha_inicio {{ params.fecha_inicio }}{% endif %} "
         "{% if params.fecha_fin %}--fecha_fin {{ params.fecha_fin }}{% endif %} "
     )
 
     ingestar_cambios_api = DockerOperator(
         task_id='ingestar_cambios_api',
-        image='python:3.11-slim',
+        image='ghcr.io/[usuario]/[repo]/ingesta:latest',
         api_version='auto',
         auto_remove=True,
         # 1. Install dependencies from the mounted requirements file
@@ -60,9 +71,21 @@ with DAG(
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',  # Connect to the same network as other services
         mounts=[
+            # IMPORTANTE: Ya no montamos todo el código (/app <- HOST_PROJECT_PATH).
+            # Solo montamos los directorios donde persisten datos (DB, exports, logs).
             Mount(
-                source=HOST_PROJECT_PATH,  # Absolute path on the HOST machine
-                target="/app",             # Path inside the container
+                source=f"{HOST_PROJECT_PATH}/database",
+                target="/app/database",
+                type="bind"
+            ),
+            Mount(
+                source=f"{HOST_PROJECT_PATH}/daily_exports",
+                target="/app/daily_exports",
+                type="bind"
+            ),
+             Mount(
+                source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
+                target="/app/ingestion/.dlt",
                 type="bind"
             )
         ],
@@ -75,24 +98,22 @@ with DAG(
 
     transformar_daily_exports = DockerOperator(
         task_id='transformar_daily_exports',
-        image='python:3.11-slim',
+        image='ghcr.io/[usuario]/[repo]/transformacion:latest',
         api_version='auto',
         auto_remove=True,
-        # 1. Generate dynamic profiles.yml
-        # 2. Install dependencies
-        # 3. Run dbt build using the generated profile
-        command="/bin/bash /app/transform/entrypoint.sh ",
+        # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
+        command="dbt build --profiles-dir ~/.dbt",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[
             Mount(
-                source=HOST_PROJECT_PATH,
-                target="/app",
+                source=f"{HOST_PROJECT_PATH}/database",
+                target="/app/database",
                 type="bind"
             )
         ],
-        working_dir="/app",
         environment={
+             # Pasar variables necesarias para dbt/profiles si las hubiera
             "TOKEN": os.getenv("TOKEN"),
             "API_KEY": os.getenv("API_KEY")
         }
