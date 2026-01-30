@@ -18,7 +18,7 @@ with DAG(
     }
 ) as dag:
 
-    ingestion_command = (
+    ingestion_changes_command = (
         "python ingestion/dlthub_api_consumer.py "
         "{% if params.fecha_inicio %}--fecha_inicio {{ params.fecha_inicio }}{% endif %} "
         "{% if params.fecha_fin %}--fecha_fin {{ params.fecha_fin }}{% endif %} "
