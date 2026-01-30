@@ -26,7 +26,7 @@ with DAG(
 
     ingestar_cambios_api = DockerOperator(
         task_id='ingestar_cambios_api',
-        image='ghcr.io/[usuario]/[repo]/ingesta:latest',
+        image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/ingesta:latest',
         api_version='auto',
         auto_remove=True,
         # 1. Install dependencies from the mounted requirements file
@@ -62,7 +62,7 @@ with DAG(
 
     transformar_cambios_db = DockerOperator(
         task_id='transformar_cambios_db',
-        image='ghcr.io/[usuario]/[repo]/transformacion:latest',
+        image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/transformacion:latest',
         api_version='auto',
         auto_remove=True,
         # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
