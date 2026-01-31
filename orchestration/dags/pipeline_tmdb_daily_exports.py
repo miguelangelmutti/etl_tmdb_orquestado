@@ -30,8 +30,6 @@ with DAG(
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[
-            # IMPORTANTE: Ya no montamos todo el código (/app <- HOST_PROJECT_PATH).
-            # Solo montamos los directorios donde persisten datos (DB, exports, logs).
             Mount(
                 source=f"{HOST_PROJECT_PATH}/database",
                 target="/app/database",
@@ -42,12 +40,12 @@ with DAG(
                 target="/app/daily_exports",
                 type="bind"
             ),
-             Mount(
+            Mount(
                 source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
                 target="/app/ingestion/.dlt",
                 type="bind"
             ),
-             Mount(
+            Mount(
                 source=f"{HOST_PROJECT_PATH}/logs",
                 target="/app/logs",
                 type="bind"
@@ -55,8 +53,7 @@ with DAG(
         ],
         environment={
             "TOKEN": os.getenv("TOKEN"),
-            "API_KEY": os.getenv("API_KEY"),
-            #"TMDB_ACCESS_TOKEN": os.getenv("TOKEN") # For dlt native resolution
+            "API_KEY": os.getenv("API_KEY")
         }
     )
 
@@ -71,8 +68,6 @@ with DAG(
         image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/ingesta:latest',
         api_version='auto',
         auto_remove=True,
-        # 1. Install dependencies from the mounted requirements file
-        # 2. Run the ingestion script
         command=ingestion_changes_command,
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',  # Connect to the same network as other services
@@ -89,12 +84,12 @@ with DAG(
                 target="/app/daily_exports",
                 type="bind"
             ),
-             Mount(
+            Mount(
                 source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
                 target="/app/ingestion/.dlt",
                 type="bind"
             ),
-             Mount(
+            Mount(
                 source=f"{HOST_PROJECT_PATH}/logs",
                 target="/app/logs",
                 type="bind"
