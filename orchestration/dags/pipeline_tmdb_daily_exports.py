@@ -113,8 +113,6 @@ with DAG(
         image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/transformacion:latest',
         api_version='auto',
         auto_remove=True,
-        # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
-        # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
         command="dbt build",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
