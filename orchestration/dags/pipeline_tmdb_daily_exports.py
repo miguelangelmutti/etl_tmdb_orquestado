@@ -56,7 +56,7 @@ with DAG(
         environment={
             "TOKEN": os.getenv("TOKEN"),
             "API_KEY": os.getenv("API_KEY"),
-            "TMDB_ACCESS_TOKEN": os.getenv("TOKEN") # For dlt native resolution
+            #"TMDB_ACCESS_TOKEN": os.getenv("TOKEN") # For dlt native resolution
         }
     )
 
