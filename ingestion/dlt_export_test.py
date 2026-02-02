@@ -156,7 +156,7 @@ logger.info("Iniciando pipeline de primer ingesta")
 
 # Ejemplo de uso pasando entity explícito. 
 # Activamos un limite para pruebas rapidas
-pipeline.run(tmdb_daily_ids_stream(entity="movie", limit=50) | fetch_tmdb_details)
-pipeline.run(tmdb_daily_ids_stream(entity="person", limit=50) | fetch_tmdb_details)
+pipeline.run(tmdb_daily_ids_stream(entity="movie") | fetch_tmdb_details)
+pipeline.run(tmdb_daily_ids_stream(entity="person") | fetch_tmdb_details)
 
 logger.info("Pipeline de primer ingesta completado")

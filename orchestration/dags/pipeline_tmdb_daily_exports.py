@@ -72,8 +72,6 @@ with DAG(
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',  # Connect to the same network as other services
         mounts=[
-            # IMPORTANTE: Ya no montamos todo el código (/app <- HOST_PROJECT_PATH).
-            # Solo montamos los directorios donde persisten datos (DB, exports, logs).
             Mount(
                 source=f"{HOST_PROJECT_PATH}/database",
                 target="/app/database",
