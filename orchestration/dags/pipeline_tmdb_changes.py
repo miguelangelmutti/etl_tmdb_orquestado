@@ -18,7 +18,7 @@ with DAG(
     }
 ) as dag:
 
-    ingestion_command = (
+    ingestion_changes_command = (
         "python ingestion/dlthub_api_consumer.py "
         "{% if params.fecha_inicio %}--fecha_inicio {{ params.fecha_inicio }}{% endif %} "
         "{% if params.fecha_fin %}--fecha_fin {{ params.fecha_fin }}{% endif %} "
@@ -26,7 +26,7 @@ with DAG(
 
     ingestar_cambios_api = DockerOperator(
         task_id='ingestar_cambios_api',
-        image='ghcr.io/[usuario]/[repo]/ingesta:latest',
+        image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/ingesta:latest',
         api_version='auto',
         auto_remove=True,
         # 1. Install dependencies from the mounted requirements file
@@ -51,22 +51,26 @@ with DAG(
                 source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
                 target="/app/ingestion/.dlt",
                 type="bind"
+            ),
+             Mount(
+                source=f"{HOST_PROJECT_PATH}/logs",
+                target="/app/logs",
+                type="bind"
             )
         ],
         working_dir="/app",
         environment={
             "TOKEN": os.getenv("TOKEN"),     # Pass TMDB Token if needed explicitly
-            "API_KEY": os.getenv("API_KEY")  # Pass API Key if needed explicitly
+            "API_KEY": os.getenv("API_KEY")  # Pass API Key if needed explicitly            
         }
     )
 
     transformar_cambios_db = DockerOperator(
         task_id='transformar_cambios_db',
-        image='ghcr.io/[usuario]/[repo]/transformacion:latest',
+        image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/transformacion:latest',
         api_version='auto',
         auto_remove=True,
-        # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
-        command="dbt build --profiles-dir ~/.dbt",
+        command="dbt build",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[

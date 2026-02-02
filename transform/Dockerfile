@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
 WORKDIR /app
+ENV PYTHONPATH=/app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -10,6 +11,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy requirements
 COPY transform/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy config.py to the root of the app
+COPY config.py .
+
+# Copy utils package
+COPY utils/ utils/
+
+# Create logs directory
+RUN mkdir -p logs
 
 # Copy transformation code
 COPY transform/ transform/

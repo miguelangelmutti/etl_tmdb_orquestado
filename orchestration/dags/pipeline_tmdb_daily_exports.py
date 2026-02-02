@@ -21,7 +21,7 @@ with DAG(
     ingestar_daily_exports = DockerOperator(
         task_id='ingestar_daily_exports',
         # Reemplaza [usuario]/[repo] con tu usuario y nombre de repositorio
-        image='ghcr.io/[usuario]/[repo]/ingesta:latest',
+        image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/ingesta:latest',
         api_version='auto',
         auto_remove=True,
         # El comando ahora es simplemente la ejecución del script, 
@@ -30,8 +30,6 @@ with DAG(
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[
-            # IMPORTANTE: Ya no montamos todo el código (/app <- HOST_PROJECT_PATH).
-            # Solo montamos los directorios donde persisten datos (DB, exports, logs).
             Mount(
                 source=f"{HOST_PROJECT_PATH}/database",
                 target="/app/database",
@@ -42,9 +40,14 @@ with DAG(
                 target="/app/daily_exports",
                 type="bind"
             ),
-             Mount(
+            Mount(
                 source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
                 target="/app/ingestion/.dlt",
+                type="bind"
+            ),
+            Mount(
+                source=f"{HOST_PROJECT_PATH}/logs",
+                target="/app/logs",
                 type="bind"
             )
         ],
@@ -62,17 +65,13 @@ with DAG(
 
     ingestar_cambios_api = DockerOperator(
         task_id='ingestar_cambios_api',
-        image='ghcr.io/[usuario]/[repo]/ingesta:latest',
+        image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/ingesta:latest',
         api_version='auto',
         auto_remove=True,
-        # 1. Install dependencies from the mounted requirements file
-        # 2. Run the ingestion script
         command=ingestion_changes_command,
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',  # Connect to the same network as other services
         mounts=[
-            # IMPORTANTE: Ya no montamos todo el código (/app <- HOST_PROJECT_PATH).
-            # Solo montamos los directorios donde persisten datos (DB, exports, logs).
             Mount(
                 source=f"{HOST_PROJECT_PATH}/database",
                 target="/app/database",
@@ -83,26 +82,31 @@ with DAG(
                 target="/app/daily_exports",
                 type="bind"
             ),
-             Mount(
+            Mount(
                 source=f"{HOST_PROJECT_PATH}/ingestion/.dlt", # Para persistir estado de dlt si es necesario
                 target="/app/ingestion/.dlt",
+                type="bind"
+            ),
+            Mount(
+                source=f"{HOST_PROJECT_PATH}/logs",
+                target="/app/logs",
                 type="bind"
             )
         ],
         working_dir="/app",
         environment={
             "TOKEN": os.getenv("TOKEN"),     # Pass TMDB Token if needed explicitly
-            "API_KEY": os.getenv("API_KEY")  # Pass API Key if needed explicitly
+            "API_KEY": os.getenv("API_KEY"),  # Pass API Key if needed explicitly
+            "TMDB_ACCESS_TOKEN": os.getenv("TOKEN") # For dlt native resolution
         }
     )    
 
     transformar_daily_exports = DockerOperator(
         task_id='transformar_daily_exports',
-        image='ghcr.io/[usuario]/[repo]/transformacion:latest',
+        image='ghcr.io/miguelangelmutti/etl_tmdb_orquestado/transformacion:latest',
         api_version='auto',
         auto_remove=True,
-        # El entrypoint se encarga de cambiar al directorio 'transform' y configurar profiles.yml
-        command="dbt build --profiles-dir ~/.dbt",
+        command="dbt build",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[
