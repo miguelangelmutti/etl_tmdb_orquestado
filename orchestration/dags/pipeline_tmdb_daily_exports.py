@@ -13,6 +13,7 @@ with DAG(
     schedule_interval=None,
     catchup=False,
     params={
+        "limit": 100000,
         "fecha_inicio": None,
         "fecha_fin": None
     }
@@ -26,7 +27,7 @@ with DAG(
         auto_remove=True,
         # El comando ahora es simplemente la ejecución del script, 
         # las dependencias ya están en la imagen.
-        command="python ingestion/dlt_export_test.py",
+        command="python ingestion/dlt_export_test.py --limit {{ params.limit }}",
         docker_url='unix://var/run/docker.sock',
         network_mode='etl-network',
         mounts=[

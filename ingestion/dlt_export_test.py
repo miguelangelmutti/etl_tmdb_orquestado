@@ -1,5 +1,6 @@
 import dlt
 import gzip
+import argparse
 from datetime import datetime,timedelta
 from dlt.sources.helpers import requests as dlt_requests
 from requests.exceptions import HTTPError
@@ -60,19 +61,31 @@ def tmdb_daily_ids_stream(entity="movie", limit=None):
 
     # 3. Leer archivo local
     logger.info(f"--- Procesando archivo local: {local_path} ---")
+
+    all_records = []
     
     with gzip.open(local_path, mode='rb') as f:
-        for i, line in enumerate(f):
-            if limit is not None and i >= limit:
-                logger.info(f"Límite de {limit} registros alcanzado. Deteniendo lectura.")
-                break
-                
+        logger.info("Leyendo archivo en memoria para ordenar...")
+        for line in f:
             if line:
-                record = dlt.common.json.loads(line.decode("utf-8"))
-                # Inyectamos el tipo de entidad en el registro para que el transformador lo sepa
-                record["_entity_type"] = entity
-                logger.info(f"Procesando registro: {record}")
-                yield record
+                try:
+                    record = dlt.common.json.loads(line.decode("utf-8"))
+                    record["_entity_type"] = entity
+                    all_records.append(record)
+                except Exception as e:
+                    logger.warning(f"Error al leer linea json: {e}")
+
+    # Ordenar por popularidad descendente
+    logger.info(f"Ordenando {len(all_records)} registros por popularidad descendente...")
+    all_records.sort(key=lambda x: x.get("popularity", 0), reverse=True)
+
+    for i, record in enumerate(all_records):
+        if limit is not None and i >= limit:
+             logger.info(f"Límite de {limit} registros alcanzado. Deteniendo lectura.")
+             break
+        
+        logger.info(f"Procesando registro ({i+1}/{len(all_records)}): {record.get('original_title', 'Unknown')} - Popularity: {record.get('popularity')}")
+        yield record
 
 def get_table_name(record):
     """Determina el nombre de la tabla destino basado en el tipo de entidad."""
@@ -152,11 +165,16 @@ logger = setup_logger(
             log_file=LOG_FILE, 
             capture_external_loggers=["dlt"]  # Captura logs de dlt
             )
-logger.info("Iniciando pipeline de primer ingesta")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run TMDB ingestion pipeline")
+    parser.add_argument("--limit", type=int, default=None, help="Limit number of records to process")
+    args = parser.parse_args()
 
-# Ejemplo de uso pasando entity explícito. 
-# Activamos un limite para pruebas rapidas
-pipeline.run(tmdb_daily_ids_stream(entity="movie") | fetch_tmdb_details)
-pipeline.run(tmdb_daily_ids_stream(entity="person") | fetch_tmdb_details)
+    logger.info("Iniciando pipeline de primer ingesta")
 
-logger.info("Pipeline de primer ingesta completado")
+    # Ejemplo de uso pasando entity explícito. 
+    # Activamos un limite para pruebas rapidas
+    pipeline.run(tmdb_daily_ids_stream(entity="movie", limit=args.limit) | fetch_tmdb_details)
+    pipeline.run(tmdb_daily_ids_stream(entity="person", limit=args.limit) | fetch_tmdb_details)
+
+    logger.info("Pipeline de primer ingesta completado")
