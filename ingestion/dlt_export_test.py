@@ -132,7 +132,8 @@ def get_table_name(record):
 @dlt.transformer(
     write_disposition="append", 
     primary_key="id",
-    table_name=get_table_name
+    table_name=get_table_name,
+    parallelized=True
 )
 def fetch_tmdb_details(record, api_key=dlt.secrets["tmdb_access_token"]):
     # Recuperamos el entity inyectado por el recurso padre
