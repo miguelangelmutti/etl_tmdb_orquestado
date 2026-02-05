@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feat_cicd
+      - feat_optimizar_ingesta
 
 env:
   REGISTRY: ghcr.io

@@ -5,6 +5,7 @@ from datetime import datetime,timedelta
 from dlt.sources.helpers import requests as dlt_requests
 from requests.exceptions import HTTPError
 from dlt.destinations import duckdb
+import duckdb as duckdb_lib
 import sys
 import os
 
@@ -37,55 +38,88 @@ def download_file(url, save_path):
         raise e
 
 # 1. EL RECURSO PADRE (El archivo comprimido)
-# Este recurso no escribe en la BD (selected=False) porque solo sirve de "alimentador"
-# para el siguiente paso.
-@dlt.resource(selected=False) 
-def tmdb_daily_ids_stream(entity="movie", limit=None):
+# Ahora SI escribimos en la BD (selected=True por defecto) para persistir primero
+# y luego ordenar con SQL.
+@dlt.resource(write_disposition="replace") 
+def tmdb_daily_ids_stream(entity="movie"):
     date_str = (datetime.now() - timedelta(days=1)).strftime("%m_%d_%Y")
     
     # 1. Construir URL y nombre de archivo local
-    # DAILY_EXPORT_BASE_URL tiene placeholders {} or {entity}
     try:
-        # Intento de formateo posicional (el más probable según config actual)
         daily_export_url = DAILY_EXPORT_BASE_URL.format(entity, date_str)
     except IndexError:
-        # Si falla, intentamos con keys por si acaso (aunque config actual es {})
          daily_export_url = DAILY_EXPORT_BASE_URL.format(entity=entity, date_str=date_str)
 
     filename = f"{entity}_ids_{date_str}.json.gz"
-
     local_path = DAILY_EXPORTS_DIR / filename
 
     # 2. Descargar si no existe
     download_file(daily_export_url, local_path)
 
-    # 3. Leer archivo local
+    # 3. Leer archivo local y streamear a DuckDB sin ordenar en RAM
     logger.info(f"--- Procesando archivo local: {local_path} ---")
-
-    all_records = []
     
+    # Definimos el nombre de la tabla raw explícitamente
+    table_name = f"raw_tmdb_{entity}_ids"
+
     with gzip.open(local_path, mode='rb') as f:
-        logger.info("Leyendo archivo en memoria para ordenar...")
+        logger.info(f"Leyendo archivo e insertando en tabla {table_name}...")
         for line in f:
             if line:
                 try:
                     record = dlt.common.json.loads(line.decode("utf-8"))
                     record["_entity_type"] = entity
-                    all_records.append(record)
+                    # DLT enrutará esto a la tabla correspondiente si usamos la funcion dynamic o yield table hints
+                    # Aquí lo hacemos simple: Usamos dlt.mark.with_table_name o confiamos en el recurso.
+                    # Mejor: Yield el record directo y dejamos que el recurso defina la tabla dinámicamente o fija.
+                    # Dado que el recurso se llama 'tmdb_daily_ids_stream', esa sería la tabla por defecto.
+                    # Pero queremos tablas separadas por entidad.
+                    yield dlt.mark.with_table_name(record, table_name)
                 except Exception as e:
                     logger.warning(f"Error al leer linea json: {e}")
 
-    # Ordenar por popularidad descendente
-    logger.info(f"Ordenando {len(all_records)} registros por popularidad descendente...")
-    all_records.sort(key=lambda x: x.get("popularity", 0), reverse=True)
-
-    for i, record in enumerate(all_records):
-        if limit is not None and i >= limit:
-             logger.info(f"Límite de {limit} registros alcanzado. Deteniendo lectura.")
-             break
+def get_sorted_ids(entity, limit=None):
+    """Generador que lee de DuckDB ordenado por popularidad."""
+    raw_table = f"raw_tmdb_{entity}_ids"
+    # raw_movies es el dataset_name definido en el pipeline
+    dataset = "raw_movies" 
+    
+    query = f"SELECT * FROM {dataset}.{raw_table} ORDER BY popularity DESC"
+    if limit:
+        query += f" LIMIT {limit}"
         
-        logger.info(f"Procesando registro ({i+1}/{len(all_records)}): {record.get('original_title', 'Unknown')} - Popularity: {record.get('popularity')}")
-        yield record
+    logger.info(f"Ejecutando query en DuckDB: {query}")
+    
+    # Conectamos directo a DuckDB en modo lectura
+    conn = duckdb_lib.connect(DB_PATH)
+    try:
+        # Ejecutamos y obtenemos resultados como dicts
+        # fetchall() carga en memoria pero solo los IDs que necesitamos (limitados), 
+        # o podemos iterar el cursor si es muy grande.
+        # Si limit es None (todo el dataset), fetchmany es mejor.
+        
+        # Ojo: fetch_arrow_table() o fetch_df() podrian ser mas rapidos pero dlt espera dicts
+        # Iterar el cursor es lo mas memory-safe.
+        cursor = conn.execute(query)
+        while True:
+            # Traemos en batches para ser amigables con la RAM si no hay limite
+            rows = cursor.fetchmany(1000)
+            if not rows:
+                break
+            
+            # Convertir tuplas a dicts. Necesitamos los nombres de columnas.
+            columns = [desc[0] for desc in cursor.description]
+            for row in rows:
+                record = dict(zip(columns, row))
+                # Asegurar que _entity_type esté presente (seguro lo guardamos en el paso 1)
+                record["_entity_type"] = entity
+                yield record
+                
+    except Exception as e:
+        logger.error(f"Error consultando DuckDB: {e}")
+        raise e
+    finally:
+        conn.close()
 
 def get_table_name(record):
     """Determina el nombre de la tabla destino basado en el tipo de entidad."""
@@ -96,7 +130,6 @@ def get_table_name(record):
 # 2. EL TRANSFORMADOR (La API en Paralelo)
 # data_from=tmdb_daily_ids_stream vincula este paso con el anterior
 @dlt.transformer(
-    data_from=tmdb_daily_ids_stream, 
     write_disposition="append", 
     primary_key="id",
     table_name=get_table_name
@@ -173,8 +206,29 @@ if __name__ == "__main__":
     logger.info("Iniciando pipeline de primer ingesta")
 
     # Ejemplo de uso pasando entity explícito. 
-    # Activamos un limite para pruebas rapidas
-    pipeline.run(tmdb_daily_ids_stream(entity="movie", limit=args.limit) | fetch_tmdb_details)
-    pipeline.run(tmdb_daily_ids_stream(entity="person", limit=args.limit) | fetch_tmdb_details)
+    # FASE 1: Ingesta RAW (Descarga -> DuckDB Raw Tables)
+    logger.info(">>> FASE 1: Ingesta de IDs RAW a DuckDB...")
+    pipeline.run(tmdb_daily_ids_stream(entity="movie"))
+    pipeline.run(tmdb_daily_ids_stream(entity="person"))
+
+    # FASE 2: Enriquecimiento (DuckDB Sorted -> API -> DuckDB Final Tables)
+    logger.info(">>> FASE 2: Enriquecimiento consultando IDs ordenados...")
+    
+    # Creamos un recurso wrapping para el generador, para poder usar pipe |
+    # (Aunque pipeline.run acepta generadores directos, envolverlo en resource es mas limpio si queremos opciones)
+    # Pero simple es mejor:
+    
+    movies_source = dlt.resource(
+        get_sorted_ids(entity="movie", limit=args.limit), 
+        name="sorted_movie_ids"
+    )
+    
+    people_source = dlt.resource(
+        get_sorted_ids(entity="person", limit=args.limit), 
+        name="sorted_person_ids"
+    )
+
+    pipeline.run(movies_source | fetch_tmdb_details)
+    pipeline.run(people_source | fetch_tmdb_details)
 
     logger.info("Pipeline de primer ingesta completado")
